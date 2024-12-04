@@ -2,14 +2,14 @@
 import React from 'react';
 import sol from "../../public/sol.svg";
 import usdc from "../../public/usdc.svg";
-import circle from "../../public/circle-scribble.svg";
 import usdt from "../../public/usdt.svg";
 import Image from 'next/image'
-
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { RainbowButton } from '@/Components/magicui/MagicButton';
+import { Particles } from '@/Components/magicui/particles';
 
 const itemVariants = {
     hidden: { opacity: 0, y: -30, filter: "blur(10px)" },
@@ -51,6 +51,8 @@ const floatVariants = {
     }
 };
 
+
+
 const ExploreButton = () => {
     const router = useRouter();
 
@@ -84,6 +86,12 @@ const ExploreButton = () => {
 };
 
 export default function Home() {
+      const { resolvedTheme } = useTheme();
+  const [color, setColor] = useState("#ffffff");
+ 
+  useEffect(() => {
+    setColor(resolvedTheme === "dark" ? "#ffffff" : "#000000");
+  }, [resolvedTheme]);
     return (
         <motion.main
             className='relative mb-[18rem] h-fit'
@@ -91,6 +99,13 @@ export default function Home() {
             animate="visible"
             variants={containerVariants}
         >
+              <Particles
+        className="absolute inset-0"
+        quantity={40}
+        ease={80}
+        color={color}
+        refresh
+      />
             <div className='absolute opacity-80 dark:opacity-30 left-[50%] translate-x-[-50%] -bottom-[20rem] -z-[20] size-[3rem] md:size-[12rem] overflow-hidden rounded-full bg-gradient-to-t from-purple-400 to-purple-700 blur-[8em]'>
             </div>
             <div className='absolute opacity-80 dark:opacity-30 left-[15rem] translate-x-[-50%] -bottom-[12rem] -z-[20] size-[3rem] md:size-[14rem] overflow-hidden rounded-full bg-gradient-to-t from-blue-400 to-blue-700 blur-[8em]'>

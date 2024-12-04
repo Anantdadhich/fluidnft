@@ -65,14 +65,8 @@ export default function Swap() {
               Transform your NFTs into tokens seamlessly
             </p>
           </div>
-          <div>
-            <RainbowButton 
-              onClick={() => setConnected(!connected)}
-              className="flex items-center gap-2"
-            >
-              <Wallet className="w-4 h-4" />
-              {connected ? "Connected" : "Connect Wallet"}
-            </RainbowButton>
+          <div>  
+          Wallet
           </div>
         </div>
 
@@ -94,7 +88,7 @@ export default function Swap() {
               <SwapInterface />
             </div>
           </TabsContent>
-
+  
           <TabsContent value="mint">
             <div className="flex justify-center">
               <Nftmint />
