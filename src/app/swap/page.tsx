@@ -5,9 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import { Card, CardContent } from "@/Components/ui/card";
 import { Input } from "@/Components/ui/input";
 
-import { ArrowDownUp, Wallet } from "lucide-react";
+import { ArrowDownUp} from "lucide-react";
 import { RainbowButton } from "@/Components/magicui/MagicButton";
 import { Label } from "@/Components/ui/label";
+import { Connect } from "@/Components/Walletconnect";
 
 const SwapInterface = () => {
   return (
@@ -66,7 +67,7 @@ export default function Swap() {
             </p>
           </div>
           <div>  
-          Wallet
+          <Connect /> 
           </div>
         </div>
 
