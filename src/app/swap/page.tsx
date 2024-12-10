@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import Nftmint from "@/Components/Nftmint";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import { Card, CardContent } from "@/Components/ui/card";
 import { Input } from "@/Components/ui/input";
@@ -12,7 +12,7 @@ import { Connect } from "@/Components/Walletconnect";
 
 const SwapInterface = () => {
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto ">
       <CardContent className="space-y-6 pt-6">
         <div className="space-y-4">
           <div className="space-y-2">
@@ -56,9 +56,11 @@ export default function Swap() {
   const [connected, setConnected] = useState(false);
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center px-4">
-      <div className="max-w-7xl w-full py-16">
-        {/* Header Section */}
+    <div className="min-h-[80vh] flex flex-col items-center px-4
+
+">
+      <div className=" w-full py-16">
+       
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
           <div className="flex flex-col items-center md:items-start gap-2">
             <h1 className="text-4xl font-bold">NFT Swap</h1>
@@ -71,8 +73,7 @@ export default function Swap() {
           </div>
         </div>
 
-        {/* Tabs Section */}
-        <Tabs defaultValue="swap" className="w-full">
+        <Tabs defaultValue="swap" className="w-full ">
           <div className="flex justify-center mb-6">
             <TabsList className="grid w-[400px] grid-cols-2">
               <TabsTrigger value="swap" className="text-lg">
@@ -85,14 +86,14 @@ export default function Swap() {
           </div>
 
           <TabsContent value="swap">
-            <div className="flex justify-center">
-              <SwapInterface />
+            <div className="flex justify-center ">
+              <SwapInterface  />
             </div>
           </TabsContent>
   
           <TabsContent value="mint">
             <div className="flex justify-center">
-              <Nftmint />
+             
             </div>
           </TabsContent>
         </Tabs>

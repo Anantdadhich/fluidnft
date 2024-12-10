@@ -1,96 +1,92 @@
-"use client"
+import { createUmi, generateSigner, keypairIdentity, percentAmount } from "@metaplex-foundation/umi";
+import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js"
+import { createNft, fetchDigitalAsset, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { Card } from "./ui/card";
 import { useState } from "react";
-import { RainbowButton } from "./magicui/MagicButton";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { ImageIcon, Upload } from "lucide-react";
 
-const Nftmint = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
 
-  const handleFileChange = (e:any) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
+async function createnft(name:string,symbol:string,imageurl:string){
+      
+ try {
+  const connection=new Connection(clusterApiUrl("devnet"))
+
+ const user=Keypair.generate();
+ const fromairdropSig=await connection.requestAirdrop(user.publicKey,LAMPORTS_PER_SOL)
+
+ console.log(`the key pair ${user.publicKey.toBase58()}`)
+
+
+//@ts-ignore
+ const umi=createUmi(clusterApiUrl("devnet"))
+
+ const keypair=umi.eddsa.createKeypairFromSecretKey(user.secretKey);
+
+ const signer=keypairIdentity(keypair)
+
+ umi.use(signer)
+ umi.use(mplTokenMetadata())
+
+ const mint =generateSigner(umi)
+
+ const {signature}=await createNft(umi,{
+  name:name,
+  symbol:symbol,
+  mint:mint,
+  uri:imageurl,
+  sellerFeeBasisPoints:percentAmount(0),
+  creators:[
+    {
+      address:keypair.publicKey,
+      verified:true,
+      share:100 
     }
-  };
+  ],
 
-  return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Mint Your NFT</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-    
-        <div className="space-y-2">
-          <Label htmlFor="nft-image">NFT Image</Label>
-          <div className="relative">
-            <Input
-              id="nft-image"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <div 
-              className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
-              onClick={() => document.getElementById('nft-image').click()}
-            >
-              {previewUrl ? (
-                <div className="relative aspect-square w-full max-w-[200px] mx-auto">
-                  <img
-                    src={previewUrl}
-                    alt="NFT Preview"
-                    className="rounded-lg object-cover w-full h-full"
-                  />
-                </div>
-              ) : (
-                <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
-                  <Upload className="w-8 h-8" />
-                  <p>Click to upload image</p>
-                  <p className="text-sm">PNG, JPG, GIF up to 10MB</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+ }).sendAndConfirm(umi)
+ console.log(`NFT created success ${signature}`) ;
 
-       
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nft-name">NFT Name</Label>
-            <Input
-              id="nft-name"
-              type="text"
-              placeholder="Enter NFT name"
-              className="w-full"
-            />
-          </div>
+ 
+ const createdNft=await fetchDigitalAsset(umi,mint.publicKey)
+console.log("nft creaated ",createdNft)  
+ } catch (error) {
+     console.log("Error creating ",error)
+ }
 
-          <div className="space-y-2">
-            <Label htmlFor="nft-description">NFT Description</Label>
-            <Input
-              id="nft-description"
-              type="text"
-              placeholder="Enter NFT Description"
-              className="w-full"
-            />
-          </div>
+ 
+}
 
-          <RainbowButton className="w-full">
-            {selectedFile ? "Mint NFT" : "Select Image to Mint"}
-          </RainbowButton>
-        </div>
-      </CardContent>
+
+
+export const Nftmint= ()=>{
+
+   
+ 
+   const [name,setname]=useState('');
+   const [symbol,setsymbol]=useState('');
+   const [image,setimage]=useState<File|null>(null);
+   const [imageurl,setimageurl]=useState<string>("");
+
+   const handlenftmint=async()=>{
+         if(!name || !symbol || !imageurl){
+          alert("please fill details")
+          return ;
+         }
+
+        await createnft(name,symbol,imageurl)
+   }
+
+
+
+
+ return (
+  <div className="containert">
+    <Card className="">
+    <h1 className="text-xl font-bold">Create an NFT</h1>
+        
+
     </Card>
-  );
-};
 
-export default Nftmint;
+  </div>
+)
+
+}

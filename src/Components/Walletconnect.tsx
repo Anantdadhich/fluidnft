@@ -5,7 +5,7 @@ import { UnsafeBurnerWalletAdapter } from "@solana/wallet-adapter-wallets";
 import {clusterApiUrl} from "@solana/web3.js"
 import { useMemo,FC } from "react";
 import { WalletDisconnectButton, WalletModalProvider, WalletMultiButton } from  "@solana/wallet-adapter-react-ui"
-
+require('@solana/wallet-adapter-react-ui/styles.css');
 
 export const Connect:FC=()=>{
 
@@ -28,10 +28,21 @@ export const Connect:FC=()=>{
 return (
     <ConnectionProvider endpoint={enpoint}>
    <WalletProvider wallets={wallet} autoConnect>
-   <WalletModalProvider>
-    <WalletMultiButton></WalletMultiButton>
-    <WalletDisconnectButton/>
-   </WalletModalProvider>
+ <WalletModalProvider>
+   <div className="flex-col gap-3">
+ <WalletMultiButton style={{
+   
+    backgroundColor:'#0a0a23',
+    color: '#fff',
+  
+    borderRadius:'10px'
+ }}>Connect</WalletMultiButton>
+  
+    </div>
+ </WalletModalProvider>
+   
+
+
 
    </WalletProvider>
 

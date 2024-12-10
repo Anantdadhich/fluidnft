@@ -40,9 +40,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
       
-            <main className=" max-w-7xl mx-auto px-4 min-h-[calc(100vh-21.8rem)]">
+          
               {children}
-            </main>
+           
            
         </ThemeProvider>
       </body>
