@@ -187,129 +187,134 @@ reader.readAsDataURL(file)
 }
 */
 
-import React, { useState } from "react";
-import { createUmi, generateSigner, keypairIdentity, percentAmount } from "@metaplex-foundation/umi";
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
-import { createNft, fetchDigitalAsset, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
-
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createUmi, generateSigner, percentAmount } from "@metaplex-foundation/umi";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL,  } from "@solana/web3.js";
+import {  createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters';
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
-
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { useDropzone } from "react-dropzone";
+import { bundlrUploader, createBundlrUploader } from '@metaplex-foundation/umi-uploader-bundlr';
 export const Nftmint = () => {
   const wallet = useWallet();
   const [name, setName] = useState('');
-  const [symbol, setSymbol] = useState('');
+  const [description, setdescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [walletBalance,setwalletBalance]=useState<number|null>(null)
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const network=WalletAdapterNetwork.Devnet
 
-  const connection = new Connection(clusterApiUrl("devnet"));
+  const endpoint=useMemo(()=>{
+          if (network ===WalletAdapterNetwork.Devnet){
+            const quicknodeurl=process.env.NEXT_PUBLIC_QUICKNODE_URL;
+            const quicknodeapikey=process.env.NEXT_PUBLIC_QUICKNODE_URL;
 
-  async function createNFT(name: string, symbol: string, imageUrl: string) {
-    try {
-      // Generate a new keypair for the NFT
-      const user = Keypair.generate();
-      
-      // Request airdrop for transaction fees
-      await connection.requestAirdrop(user.publicKey, LAMPORTS_PER_SOL);
-
-      // Create Umi instance
-      //@ts-ignore
-      const umi = createUmi(clusterApiUrl("devnet"));
-      const keypair = umi.eddsa.createKeypairFromSecretKey(user.secretKey);
-      const signer = keypairIdentity(keypair);
-
-      umi.use(signer);
-      umi.use(mplTokenMetadata());
-
-      const mint = generateSigner(umi);
-
-      // Create NFT
-      const { signature } = await createNft(umi, {
-        name: name,
-        symbol: symbol,
-        mint: mint,
-        uri: imageUrl,
-        sellerFeeBasisPoints: percentAmount(0),
-        creators: [
-          {
-            address: keypair.publicKey,
-            verified: true,
-            share: 100 
+            if (quicknodeapikey && quicknodeurl){
+              return `${quicknodeurl}/${quicknodeapikey}`
+            }else{
+              return clusterApiUrl(network)
+            }
           }
-        ],
-      }).sendAndConfirm(umi);
+          return clusterApiUrl(network)
+  },[network])
 
-      console.log(`NFT created successfully: ${signature}`);
+  const connection=useMemo(()=>new Connection(endpoint),[endpoint]);
+
+  const umi=useMemo(()=>{
+    //@ts-ignore
+    const umi=createUmi(endpoint).use(mplTokenMetadata());
+
+    if(wallet.publicKey){
+
+      umi.use(walletAdapterIdentity(wallet))
+    }
+    return  umi
+  },[endpoint,wallet])
+
+
+     useEffect(()=>{
+      console.log("Current endpoint",endpoint)
+
+     },[endpoint])
+
+     const onDrop =useCallback((acceptedfiles:File[])=>{
+      setImage(acceptedfiles[0])
+     },[])
+
+     const {getRootProps,getInputProps,isDragActive}=useDropzone({
+         onDrop,
+         accept:{
+          'image/*':[]
+         }
+     })
+
+     const checkbalance=async()=>{
+      if(!wallet.publicKey){
+        return;
+      }
+
+      try {
+         const balance=await connection.getBalance(wallet.publicKey)
+
+         setwalletBalance(balance / LAMPORTS_PER_SOL);
+         console.log(`wallet balance ${balance/LAMPORTS_PER_SOL} Sol`);
+      } catch (error) {
+        console.error("error",error)
+      }
+     }
       
-      // Fetch and log the created NFT details
-      const createdNft = await fetchDigitalAsset(umi, mint.publicKey);
-      console.log("NFT details:", createdNft);
-
-      return true;
-    } catch (error) {
-      console.error("Error creating NFT:", error);
-      setError("Failed to create NFT. Please try again.");
-      return false;
-    }
-  }
-
-  const handleNFTMint = async () => {
-    // Validate inputs
-    if (!wallet.publicKey) {
-      setError("Please connect your wallet first");
-      return;
-    }
-
-    if (!name || !symbol || !image) {
-      setError("Please fill in all details and upload an image");
-      return;
-    }
-
+   const mintNFT=async ()=>{
+    if(!wallet.publicKey || !image) return ;
     setIsLoading(true);
-    setError(null);
+   
+   try {
 
-    try {
-      // Convert image to base64 URL
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onloadend = async () => {
-        const imageUrl = reader.result as string;
-        const success = await createNFT(name, symbol, imageUrl);
-        
-        setIsLoading(false);
-        if (success) {
-          // Reset form
-          setName('');
-          setSymbol('');
-          setImage(null);
-          setImagePreview(null);
-          alert('NFT minted successfully!');
-        }
-      };
-    } catch (error) {
-      setIsLoading(false);
-      setError("An unexpected error occurred");
+    await checkbalance()
+     if (walletBalance ===null || walletBalance < 0.05){
+      throw new Error("insuff balance")
     }
-  };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const imagedataurl=await toBase64(image)
 
-    if (file) {
-      setImage(file);
+    const bundleruploader=createBundlrUploader(umi);
 
-      // Create image preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    const uri =await bundleruploader.uploadJson({
+      name,
+      description,
+      image:imagedataurl
+    })
+    
+
+    const mint=generateSigner(umi);
+    const {signature}=await createNft(umi,{
+      mint,
+      name,
+      uri,
+      sellerFeeBasisPoints:percentAmount(5),
+
+    }).sendAndConfirm(umi);
+
+    console.log("nft created ",signature);
+   } catch (error) {
+    console.error(error)
+   
+   }finally{
+    setIsLoading(false)
+   }
+   }
+
+   const toBase64=(file:File):Promise<string>=>{
+    return new Promise ((resolve,reject) =>{
+      const reader=new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload  = () => resolve(reader.result as string) 
+      reader.onerror = error => reject(error)
+    })
+   }
 
   return (
     <motion.div
@@ -329,12 +334,7 @@ export const Nftmint = () => {
             </p>
           </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 p-3 rounded-lg flex items-center text-red-400">
-              <AlertTriangle className="mr-2 w-5 h-5" />
-              <span>{error}</span>
-            </div>
-          )}
+          
 
           <div className="space-y-4">
             <div>
@@ -353,15 +353,15 @@ export const Nftmint = () => {
 
             <div>
               <label htmlFor="symbol" className="block text-gray-300 text-sm font-medium mb-2">
-                Symbol
+                Description
               </label>
               <input
                 id="symbol"
                 type="text"
                 className="w-full p-3 bg-gray-900 text-gray-200 border border-gray-700 rounded focus:outline-none focus:ring focus:ring-indigo-500"
-                value={symbol}
-                placeholder="Enter symbol"
-                onChange={(e) => setSymbol(e.target.value)}
+                value={description}
+                placeholder="Enter description"
+                onChange={(e) => setdescription(e.target.value)}
               />
             </div>
 
@@ -379,7 +379,7 @@ export const Nftmint = () => {
                   />
                   {imagePreview ? (
                     <img 
-                      src={imagePreview} 
+                      src={image?.name}
                       alt="Preview" 
                       className="max-h-full max-w-full object-contain rounded-lg"
                     />
@@ -401,7 +401,7 @@ export const Nftmint = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleNFTMint}
+              onClick={mintNFT}
               disabled={isLoading}
               className={`
                 w-full py-3 rounded-full font-semibold transition-all flex items-center justify-center

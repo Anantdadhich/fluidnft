@@ -1,5 +1,5 @@
 "use client"
-
+ 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
@@ -25,7 +25,7 @@ export default function SwapPage() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden text-white">
-      {/* Sparkle Background */}
+    
       <div className="absolute inset-0 z-0">
         <SparklesCore 
           particleColor="white" 
