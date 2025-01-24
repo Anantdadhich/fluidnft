@@ -1,33 +1,23 @@
 "use client "
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
+
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { UnsafeBurnerWalletAdapter } from "@solana/wallet-adapter-wallets";
-import {clusterApiUrl} from "@solana/web3.js"
-import { useMemo,FC } from "react";
-import { WalletDisconnectButton, WalletModalProvider, WalletMultiButton } from  "@solana/wallet-adapter-react-ui"
+
+import { useMemo, ReactNode, FC } from "react";
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+
+import { WalletModalProvider, WalletMultiButton } from  "@solana/wallet-adapter-react-ui"
 require('@solana/wallet-adapter-react-ui/styles.css');
+
 
 export const Connect:FC=()=>{
 
-  const network=WalletAdapterNetwork.Devnet;
-  
-  const enpoint=useMemo(()=>
-     clusterApiUrl(network)
-  ,
-[network])
-
-
-  const wallet=useMemo(()=>
-  [
-    new UnsafeBurnerWalletAdapter()
-  ]
-  
-,[network])
+  const endpoint = useMemo(() => "https://api.devnet.solana.com", []);
+  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
 
 return (
-    <ConnectionProvider endpoint={enpoint}>
-   <WalletProvider wallets={wallet} autoConnect>
+    <ConnectionProvider endpoint={endpoint}>
+   <WalletProvider wallets={wallets} autoConnect>
  <WalletModalProvider>
    <div className="flex-col gap-3">
  <WalletMultiButton style={{
@@ -37,7 +27,7 @@ return (
   
     borderRadius:'10px'
  }}>Connect</WalletMultiButton>
-  
+
     </div>
  </WalletModalProvider>
    

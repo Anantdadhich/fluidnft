@@ -1,12 +1,4 @@
-/*import { createUmi, generateSigner, keypairIdentity, percentAmount } from "@metaplex-foundation/umi";
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js"
-import { createNft, fetchDigitalAsset, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
-import { Card, CardContent } from "./ui/card";
-import React, { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-
-  
-
+/*
 const connection=new Connection(clusterApiUrl("devnet"))
 
 async function createnft(name:string,symbol:string,imageurl:string){
@@ -55,266 +47,130 @@ console.log("nft creaated ",createdNft)
  } catch (error) {
      console.log("Error creating ",error)
  }
-
- 
 }
 
-
-
-
-
-export const Nftmint= ()=>{
-
-   
-    const wallet=useWallet();
-   const [name,setname]=useState('');
-   const [symbol,setsymbol]=useState('');
-   const [image,setimage]=useState<File|null>(null);
-   const [imageurl,setimageurl]=useState<string>("  ");
-   const [walletbalance,setwalletbalance]=useState<number|null>(null);
-
-   const handlenftmint=async()=>{
-         if(!name || !symbol || !imageurl){
-          alert("please fill details")
-          return ;
-         }
-
-        await createnft(name,symbol,imageurl)
-   }
-
-
-const getBalance=async ()=>{
-    if(!wallet.publicKey){
-    return 
-   }
- try {
-   const balance=await connection.getBalance(wallet.publicKey);
-  setwalletbalance(balance /LAMPORTS_PER_SOL);
- } catch (error) {
-    alert("connect wallet");
-    console.log(error)
- }
-}
-
-
-
-
-
-
-
-   const fileupload=(e:React.ChangeEvent<HTMLInputElement>)=>{
-const file=e.target.files?.[0];
-
-if(file) {
-  setimage(file)
-
-
-const reader=new FileReader()
-
-reader.onloadend=()=>{
-     setimageurl(reader.result as string)
-}
-reader.readAsDataURL(file)
-   }
-
-  }
-
- return (
-  
-  <Card className="w-full max-w-md mx-auto bg-gray-950 shadow-lg rounded-lg overflow-hidden">
-  <CardContent className="space-y-6 p-6">
-    <div className="space-y-6">
-
-      <div className="space-y-2">
-        <label htmlFor="name" className="block text-gray-300 text-sm font-medium">
-          NFT Name
-        </label>
-        <input
-          id="name"
-          type="text"
-          className="w-full p-3 bg-gray-900 text-gray-200 border border-gray-700 rounded focus:outline-none focus:ring focus:ring-indigo-500"
-          value={name}
-          placeholder="Enter NFT name"
-          onChange={(e) => setname(e.target.value)}
-        />
-      </div>
-
-  
-      <div className="space-y-2">
-        <label htmlFor="symbol" className="block text-gray-300 text-sm font-medium">
-          Symbol
-        </label>
-        <input
-          id="symbol"
-          type="text"
-          className="w-full p-3 bg-gray-900 text-gray-200 border border-gray-700 rounded focus:outline-none focus:ring focus:ring-indigo-500"
-          value={symbol}
-          placeholder="Enter symbol"
-          onChange={(e) => setsymbol(e.target.value)}
-        />
-      </div>
-
-
-      <div className="space-y-2">
-        <label htmlFor="image" className="block text-gray-300 text-sm font-medium">
-          Image Upload
-        </label>
-        <input
-          id="image"
-          type="file"
-          accept="image/*"
-          className="w-full bg-gray-900 text-gray-400 border border-gray-700 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700"
-          onChange={fileupload}
-        />
-      </div>
-
-      <div className="mt-4">
-        <button
-          onClick={handlenftmint}
-          className="w-full py-3 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition-all"
-        >
-          Create
-        </button>
-      </div>
-    </div>
-  </CardContent>
-</Card>
-
-
-  
-)
-
-}
 */
-
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createUmi, generateSigner, percentAmount } from "@metaplex-foundation/umi";
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL,  } from "@solana/web3.js";
-import {  createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters';
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "framer-motion";
-import { PlusCircle, Upload, AlertTriangle } from "lucide-react";
+import { PlusCircle, Upload } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useDropzone } from "react-dropzone";
-import { bundlrUploader, createBundlrUploader } from '@metaplex-foundation/umi-uploader-bundlr';
+import { createBundlrUploader } from '@metaplex-foundation/umi-uploader-bundlr';
+
 export const Nftmint = () => {
   const wallet = useWallet();
   const [name, setName] = useState('');
   const [description, setdescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [walletBalance,setwalletBalance]=useState<number|null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [walletBalance, setwalletBalance] = useState<number|null>(null);
   const [isLoading, setIsLoading] = useState(false);
-    const network=WalletAdapterNetwork.Devnet
+  const network = WalletAdapterNetwork.Devnet;
 
-  const endpoint=useMemo(()=>{
-          if (network ===WalletAdapterNetwork.Devnet){
-            const quicknodeurl=process.env.NEXT_PUBLIC_QUICKNODE_URL;
-            const quicknodeapikey=process.env.NEXT_PUBLIC_QUICKNODE_URL;
+  const endpoint = useMemo(() => {
+    if (network === WalletAdapterNetwork.Devnet) {
+      const quicknodeurl = process.env.NEXT_PUBLIC_QUICKNODE_URL;
+      const quicknodeapikey = process.env.NEXT_PUBLIC_QUICKNODE_API_KEY; // Fixed variable name
 
-            if (quicknodeapikey && quicknodeurl){
-              return `${quicknodeurl}/${quicknodeapikey}`
-            }else{
-              return clusterApiUrl(network)
-            }
-          }
-          return clusterApiUrl(network)
-  },[network])
+      if (quicknodeapikey && quicknodeurl) {
+        return `${quicknodeurl}/${quicknodeapikey}`;
+      }
+      return clusterApiUrl(network);
+    }
+    return clusterApiUrl(network);
+  }, [network]);
 
-  const connection=useMemo(()=>new Connection(endpoint),[endpoint]);
+  const connection = useMemo(() => new Connection(endpoint), [endpoint]);
 
-  const umi=useMemo(()=>{
+  const umi = useMemo(() => {
     //@ts-ignore
-    const umi=createUmi(endpoint).use(mplTokenMetadata());
-
-    if(wallet.publicKey){
-
-      umi.use(walletAdapterIdentity(wallet))
+    const umi = createUmi(endpoint).use(mplTokenMetadata());
+    if (wallet.publicKey) {
+      umi.use(walletAdapterIdentity(wallet));
     }
-    return  umi
-  },[endpoint,wallet])
+    return umi;
+  }, [endpoint, wallet]);
 
+  useEffect(() => {
+    console.log("Current endpoint", endpoint);
+  }, [endpoint]);
 
-     useEffect(()=>{
-      console.log("Current endpoint",endpoint)
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    setImage(file);
+  
+    const preview = await toBase64(file);
+    setImagePreview(preview);
+  }, []);
 
-     },[endpoint])
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': []
+    }
+  });
 
-     const onDrop =useCallback((acceptedfiles:File[])=>{
-      setImage(acceptedfiles[0])
-     },[])
+  const checkbalance = async () => {
+    if (!wallet.publicKey) return;
 
-     const {getRootProps,getInputProps,isDragActive}=useDropzone({
-         onDrop,
-         accept:{
-          'image/*':[]
-         }
-     })
+    try {
+      const balance = await connection.getBalance(wallet.publicKey);
+      setwalletBalance(balance / LAMPORTS_PER_SOL);
+      console.log(`wallet balance ${balance / LAMPORTS_PER_SOL} Sol`);
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
 
-     const checkbalance=async()=>{
-      if(!wallet.publicKey){
-        return;
-      }
-
-      try {
-         const balance=await connection.getBalance(wallet.publicKey)
-
-         setwalletBalance(balance / LAMPORTS_PER_SOL);
-         console.log(`wallet balance ${balance/LAMPORTS_PER_SOL} Sol`);
-      } catch (error) {
-        console.error("error",error)
-      }
-     }
-      
-   const mintNFT=async ()=>{
-    if(!wallet.publicKey || !image) return ;
+  const mintNFT = async () => {
+    if (!wallet.publicKey || !image) return;
     setIsLoading(true);
-   
-   try {
 
-    await checkbalance()
-     if (walletBalance ===null || walletBalance < 0.05){
-      throw new Error("insuff balance")
+    try {
+      await checkbalance();
+      if (walletBalance === null || walletBalance < 0.05) {
+        throw new Error("Insufficient balance");
+      }
+
+      const imagedataurl = await toBase64(image);
+      const bundlrUploader = createBundlrUploader(umi);
+
+      const uri = await bundlrUploader.uploadJson({
+        name,
+        description,
+        image: imagedataurl
+      });
+
+      const mint = generateSigner(umi);
+      const { signature } = await createNft(umi, {
+        mint,
+        name,
+        uri,
+        sellerFeeBasisPoints: percentAmount(5),
+      }).sendAndConfirm(umi);
+
+      console.log("nft created ", signature);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const imagedataurl=await toBase64(image)
-
-    const bundleruploader=createBundlrUploader(umi);
-
-    const uri =await bundleruploader.uploadJson({
-      name,
-      description,
-      image:imagedataurl
-    })
-    
-
-    const mint=generateSigner(umi);
-    const {signature}=await createNft(umi,{
-      mint,
-      name,
-      uri,
-      sellerFeeBasisPoints:percentAmount(5),
-
-    }).sendAndConfirm(umi);
-
-    console.log("nft created ",signature);
-   } catch (error) {
-    console.error(error)
-   
-   }finally{
-    setIsLoading(false)
-   }
-   }
-
-   const toBase64=(file:File):Promise<string>=>{
-    return new Promise ((resolve,reject) =>{
-      const reader=new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload  = () => resolve(reader.result as string) 
-      reader.onerror = error => reject(error)
-    })
-   }
+  const toBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
 
   return (
     <motion.div
@@ -334,8 +190,6 @@ export const Nftmint = () => {
             </p>
           </div>
 
-          
-
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-gray-300 text-sm font-medium mb-2">
@@ -352,11 +206,11 @@ export const Nftmint = () => {
             </div>
 
             <div>
-              <label htmlFor="symbol" className="block text-gray-300 text-sm font-medium mb-2">
+              <label htmlFor="description" className="block text-gray-300 text-sm font-medium mb-2">
                 Description
               </label>
               <input
-                id="symbol"
+                id="description"
                 type="text"
                 className="w-full p-3 bg-gray-900 text-gray-200 border border-gray-700 rounded focus:outline-none focus:ring focus:ring-indigo-500"
                 value={description}
@@ -366,20 +220,15 @@ export const Nftmint = () => {
             </div>
 
             <div>
-              <label htmlFor="image" className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-gray-300 text-sm font-medium mb-2">
                 Image Upload
               </label>
-              <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer bg-gray-900 hover:bg-gray-800 transition-all">
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                  />
+              <div {...getRootProps()} className="flex items-center justify-center w-full">
+                <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer bg-gray-900 hover:bg-gray-800 transition-all">
+                  <input {...getInputProps()} />
                   {imagePreview ? (
                     <img 
-                      src={image?.name}
+                      src={imagePreview}
                       alt="Preview" 
                       className="max-h-full max-w-full object-contain rounded-lg"
                     />
@@ -387,14 +236,14 @@ export const Nftmint = () => {
                     <div className="flex flex-col items-center justify-center">
                       <Upload className="w-10 h-10 text-gray-500 mb-2" />
                       <p className="text-sm text-gray-400">
-                        Click to upload or drag and drop
+                        {isDragActive ? "Drop the file here" : "Click to upload or drag and drop"}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         PNG, JPG, or GIF (MAX. 800x400px)
                       </p>
                     </div>
                   )}
-                </label>
+                </div>
               </div>
             </div>
 
@@ -402,10 +251,10 @@ export const Nftmint = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={mintNFT}
-              disabled={isLoading}
+              disabled={isLoading || !image || !name || !description}
               className={`
                 w-full py-3 rounded-full font-semibold transition-all flex items-center justify-center
-                ${isLoading 
+                ${(isLoading || !image || !name || !description)
                   ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
                 }

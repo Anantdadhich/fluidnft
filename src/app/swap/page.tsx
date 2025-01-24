@@ -48,16 +48,16 @@ export default function SwapPage() {
         >
           <div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">
-              NFT Swap Hub
+              Swap NFT
             </h1>
             <p className="text-gray-400 mt-3 max-w-xl">
               Transform your digital assets instantly. Swap, mint, and maximize your Solana NFT potential.
             </p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Connect />
+            <Connect></Connect>
           </div>
-        </motion.div>
+        </motion.div> 
 
         
         <Card className="bg-transparent border-none">
