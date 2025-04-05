@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-require-imports */
-// eslint-disable-next-line react-hooks/exhaustive-deps
+
 
 "use client";
 

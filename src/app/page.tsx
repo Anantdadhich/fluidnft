@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Particles } from '@/components/magicui/particles';
+
 import { 
   Rocket, 
   Zap, 
@@ -12,6 +12,7 @@ import {
 
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Particles } from '@/components/magicui/particles';
 
 interface FeatureCardProps {
   icon: LucideIcon,
@@ -64,7 +65,7 @@ export default function Home() {
     <div className="relative min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden">
 
       <div className="absolute inset-0 z-0">
-        <Particles 
+        <Particles
           size={1}
           quantity={100}
           ease={0.5}
