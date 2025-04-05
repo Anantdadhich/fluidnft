@@ -2,19 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Particles } from '@/Components/magicui/particles';
+import { Particles } from '@/components/magicui/particles';
 import { 
   Rocket, 
   Zap, 
   Shield, 
-  Wallet, 
+  Wallet,
+  LucideIcon, 
 
 } from 'lucide-react';
-import { Card, CardContent } from '@/Components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
+interface FeatureCardProps {
+  icon: LucideIcon,
+  title: string,
+  description: string
+}
 
-
-const FeatureCard = ({ icon: Icon, title, description }:any) => (
+const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => (
   <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:border-primary/50 transition-all duration-300 group hover:bg-transparent hover:cursor-pointer ">
     <CardContent className="p-6 space-y-4">
       <div className="bg-primary/10 p-3 rounded-xl w-fit group-hover:bg-primary/20 transition-all">

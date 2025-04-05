@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Lexend_Deca } from 'next/font/google';
 import "./globals.css";
-import { ThemeProvider } from "@/Components/Providers";
+import { ThemeProvider } from "@/components/Providers";
+import WalletContextProvider from "@/components/Walletconnect";
+import { Toaster } from "sonner";
 
 
 const mainFont = Bricolage_Grotesque({
@@ -17,10 +19,15 @@ const secondaryFont = Lexend_Deca({
 });
 
 
-
 export const metadata: Metadata = {
-  title: "Mint",
+  title: "FluidNFT",
   description: "Instant NFT Liquidation",
+  openGraph: {
+    type: 'website',
+    title: "FluidNFT",
+    description: "Instant NFT Liquidation",
+
+  }
 };
 
 export default function RootLayout({
@@ -33,17 +40,20 @@ export default function RootLayout({
       <body
         className={`${mainFont.variable} ${secondaryFont.variable} font-mainFont antialiased`}
       >
-        <ThemeProvider
+       <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
       
-          
+          <WalletContextProvider>
+            <main className="">
               {children}
-           
-           
+            </main>
+            <Toaster position="bottom-right" richColors />
+          </WalletContextProvider>
+         
         </ThemeProvider>
       </body>
     </html>

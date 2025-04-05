@@ -1,44 +1,27 @@
-"use client "
+'use client';
 
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-
-import { useMemo, ReactNode, FC } from "react";
+import { ReactNode, useMemo } from 'react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 
-import { WalletModalProvider, WalletMultiButton } from  "@solana/wallet-adapter-react-ui"
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 require('@solana/wallet-adapter-react-ui/styles.css');
 
+interface Props {
+  children: ReactNode;
+}
 
-export const Connect:FC=()=>{
-
+export default function WalletContextProvider({ children }: Props) {
   const endpoint = useMemo(() => "https://api.devnet.solana.com", []);
   const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
-
-return (
+  return (
     <ConnectionProvider endpoint={endpoint}>
-   <WalletProvider wallets={wallets} autoConnect>
- <WalletModalProvider>
-   <div className="flex-col gap-3">
- <WalletMultiButton style={{
-   
-    backgroundColor:'#0a0a23',
-    color: '#fff',
-  
-    borderRadius:'10px'
- }}>Connect</WalletMultiButton>
-
-    </div>
- </WalletModalProvider>
-   
-
-
-
-   </WalletProvider>
-
-
-</ConnectionProvider>
-)
-
-
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>{children}</WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
 }

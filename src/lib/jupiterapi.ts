@@ -8,8 +8,8 @@ export async function getSwapQuote(inputMint: string, outputMint: string, amount
       params: {
         inputMint,
         outputMint,
-        amount: amount * 1e9, // Convert SOL to lamports
-        slippageBps: 50 // 0.5% slippage
+        amount: amount * 1e9, 
+        slippageBps: 50 
       }
     })
 
