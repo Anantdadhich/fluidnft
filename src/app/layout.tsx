@@ -3,7 +3,8 @@ import { Bricolage_Grotesque, Lexend_Deca } from 'next/font/google';
 import "./globals.css";
 import { ThemeProvider } from "@/components/Providers";
 import WalletContextProvider from "@/components/Walletconnect";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+
 
 
 const mainFont = Bricolage_Grotesque({
@@ -42,7 +43,7 @@ export default function RootLayout({
       >
        <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

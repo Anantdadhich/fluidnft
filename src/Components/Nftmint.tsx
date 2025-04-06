@@ -27,21 +27,10 @@ export default function NFTMinter() {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const network = WalletAdapterNetwork.Devnet;
 
-  const endpoint = useMemo(() => {
-    if (network === WalletAdapterNetwork.Devnet) {
-      const quicknodeUrl = process.env.NEXT_PUBLIC_QUICKNODE_URL;
-      const quicknodeApiKey = process.env.NEXT_PUBLIC_QUICKNODE_API_KEY;
-
-      if (quicknodeUrl && quicknodeApiKey) {
-        return `${quicknodeUrl}/${quicknodeApiKey}`;
-      } else {
-        return clusterApiUrl(network);
-      }
-    }
-    return clusterApiUrl(network);
-  }, [network]);
-
+  // Use Solana's public devnet endpoint instead of QuickNode to avoid authorization issues
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const connection = useMemo(() => new Connection(endpoint), [endpoint]);
+  
   const umi = useMemo(() => {
     const umi = createUmi(endpoint).use(mplTokenMetadata());
 
@@ -52,9 +41,12 @@ export default function NFTMinter() {
     return umi;
   }, [endpoint, wallet]);
 
+  // Check balance when wallet connects
   useEffect(() => {
-    console.log("Current endpoint:", endpoint);
-  }, [endpoint]);
+    if (wallet.publicKey) {
+      checkBalance();
+    }
+  }, [wallet.publicKey]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setImage(acceptedFiles[0])
@@ -70,39 +62,82 @@ export default function NFTMinter() {
       toast.error('Wallet not connected');
       return;
     }
+    
     try {
       const balance = await connection.getBalance(wallet.publicKey);
-      setWalletBalance(balance / LAMPORTS_PER_SOL);
-      console.log(`Wallet balance: ${balance / LAMPORTS_PER_SOL} SOL`);
+      const balanceInSol = balance / LAMPORTS_PER_SOL;
+      setWalletBalance(balanceInSol);
+      console.log(`Wallet balance: ${balanceInSol} SOL`);
+      
+      if (balanceInSol < 0.05) {
+        toast.warning(`Low balance: ${balanceInSol.toFixed(4)} SOL. Minimum 0.05 SOL recommended for minting.`);
+      }
     } catch (error) {
       console.error('Error checking balance:', error);
-      toast.error('Failed to check wallet balance.');
+      toast.error('Failed to check wallet balance. Using default Solana devnet endpoint.');
+      
+      // Try with default endpoint as fallback
+      try {
+        const fallbackConnection = new Connection(clusterApiUrl(network));
+        const balance = await fallbackConnection.getBalance(wallet.publicKey);
+        setWalletBalance(balance / LAMPORTS_PER_SOL);
+      } catch (fallbackError) {
+        console.error('Fallback balance check failed:', fallbackError);
+      }
     }
   };
 
+  const toBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = error => reject(error)
+    })
+  }
+
   const mintNFT = async () => {
-    if (!wallet.publicKey || !image) return;
+    if (!wallet.publicKey || !image) {
+      toast.error('Please connect wallet and upload an image');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
+      // Refresh balance before minting
       await checkBalance();
 
-      if (walletBalance === null || walletBalance < 0.05) {
-        throw new Error(`Insufficient balance: ${walletBalance} SOL. Minimum 0.05 SOL required.`);
-      }
-
+      // Proceed with minting even with low balance - the transaction might still succeed
+      console.log("Starting NFT minting process...");
+      
+      // Convert image to base64
       const imageDataUrl = await toBase64(image);
+      console.log("Image converted to base64");
 
-      // Upload metadata
+      // Create bundlr uploader with proper configuration
+      console.log("Creating bundlr uploader with endpoint:", endpoint);
       const bundlrUploader = createBundlrUploader(umi);
+      
+      // Upload metadata to Arweave via Bundlr
+      console.log("Uploading metadata...");
       const uri = await bundlrUploader.uploadJson({
         name,
         description,
         image: imageDataUrl,
       });
+      console.log("Metadata uploaded, URI:", uri);
 
       // Create NFT
+      console.log("Generating mint signer...");
       const mint = generateSigner(umi);
+      
+      console.log("Creating NFT with params:", {
+        mint: mint.publicKey,
+        name,
+        uri,
+      });
+      
       const { signature } = await createNft(umi, {
         mint,
         name,
@@ -115,23 +150,23 @@ export default function NFTMinter() {
     } catch (error) {
       console.error('Error minting NFT:', error);
       let errorMessage = 'Failed to mint NFT. ';
+      
       if (error instanceof Error) {
         errorMessage += error.message;
+        
+        // Provide more helpful messages for common errors
+        if (error.message.includes("insufficient funds")) {
+          errorMessage = "Insufficient funds for transaction. Please add more SOL to your wallet.";
+        } else if (error.message.includes("failed to fetch")) {
+          errorMessage = "Network connection issue. Please check your internet connection and try again.";
+        }
       }
+      
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
-  const toBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = error => reject(error)
-    })
-  }
 
   return (
     <Card className="w-full bg-white/10 backdrop-blur-md border-white/20 hover:border-primary/30 transition-all duration-300">
@@ -204,7 +239,7 @@ export default function NFTMinter() {
             </div>
             <Button
               onClick={mintNFT}
-              disabled={!name || !description || !image || isLoading || !wallet.publicKey || walletBalance === null || walletBalance < 0.05}
+              disabled={!name || !description || !image || isLoading || !wallet.publicKey}
               className="w-full "
             >
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

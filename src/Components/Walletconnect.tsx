@@ -4,6 +4,8 @@ import { ReactNode, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { clusterApiUrl } from '@solana/web3.js';
 
 
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -13,7 +15,8 @@ interface Props {
 }
 
 export default function WalletContextProvider({ children }: Props) {
-  const endpoint = useMemo(() => "https://api.devnet.solana.com", []);
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
   return (

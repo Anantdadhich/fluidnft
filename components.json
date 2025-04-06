@@ -16,7 +16,7 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks",
-    "magicui":"@components/magicui"
+    "magicui":"@/components/magicui"
   },
   "iconLibrary": "lucide"
 }
