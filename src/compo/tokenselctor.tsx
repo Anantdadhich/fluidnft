@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/car';
 import { RadioGroup, RadioGroupItem } from './ui/radiogroup';
 import { Label } from './ui/label';
 import { Coins } from 'lucide-react';
@@ -9,8 +9,8 @@ import { Coins } from 'lucide-react';
 const VALID_TOKENS = [
   {
     name: 'usdc',
-    icon: <Coins className="h-5 w-5 text-blue-500" />,
-    color: 'border-blue-500'
+    icon: <Coins className="h-5 w-5 text-blue-500 " />,
+    color: 'border-blue-500 '
   },
   {
     name: 'usdt',
@@ -60,7 +60,7 @@ export default function TokenSelector({ onSelect }: TokenSelectorProps) {
             {VALID_TOKENS.map(token => (
               <div
                 key={token.name}
-                className={`flex items-center space-x-2 h-full rounded-md border-[3px] p-4 py-6 transition-all duration-300 hover:bg-[#b037d3]/5 ${
+                className={`flex items-center space-x-2 h-full text-white rounded-md border-[3px] p-4 py-6 transition-all duration-300 hover:bg-[#b037d3]/5 ${
                   selectedToken === token.name 
                     ? token.color + ' shadow-lg shadow-' + token.name + '/10' 
                     : 'border-white/10'
@@ -86,7 +86,7 @@ export default function TokenSelector({ onSelect }: TokenSelectorProps) {
           
           {selectedToken && (
             <div className="mt-6 p-4 rounded-md bg-primary/10 border border-primary/20">
-              <p className="text-sm">You will receive <span className="font-semibold text-primary">{selectedToken.toUpperCase()}</span> tokens for your NFT</p>
+              <p className="text-sm text-white">You will receive <span className="font-semibold text-primary text-white text-[15px]">{selectedToken.toUpperCase()}</span> tokens for your NFT</p>
             </div>
           )}
         </div>

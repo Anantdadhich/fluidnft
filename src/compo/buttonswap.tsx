@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { getSwapQuote } from '@/lib/jupiterapi'
 import { getNFTPrice } from '@/lib/tensorapi'
-import { Button } from './ui/button'
+import { Button } from './ui/butto'
 
 
 interface NFT {

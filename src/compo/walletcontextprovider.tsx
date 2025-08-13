@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 
 const WalletContextProviderInner = dynamic(
-  () => import("./Walletconnect"),
+  () => import("../compo/Walletconnect"),
   { ssr: false }
 );
 

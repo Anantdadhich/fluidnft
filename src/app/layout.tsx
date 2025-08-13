@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Lexend_Deca } from 'next/font/google';
 import "./globals.css";
-import { ThemeProvider } from "@/components/Providers";
-import WalletContextProvider from "@/components/Walletconnect";
-import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/compo/Providers";
+import WalletContextProvider from "@/compo/Walletconnect";
+import { Toaster } from "@/compo/ui/sonner";
 
 
 
